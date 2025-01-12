@@ -1,0 +1,18 @@
+Tools required
+
+Flask==2.0.2
+SpeechRecognition==3.8.1
+transformers==4.11.3
+torch==1.9.1
+requests==2.25.1
+pydub==0.25.1
+flask_cors==3.1.1
+
+Description of each tool:-
+1.Flask: The web framework you’re using to create the web application.
+S2.peechRecognition: A Python library for recognizing speech, used for transcribing audio to text.
+3.transformers: The Hugging Face library that provides pre-trained models for NLP tasks, such as summarization and question answering.
+4.torch: The PyTorch library, which is used by many transformer models for deep learning tasks.
+requests: A library for making HTTP requests (used for interacting with APIs if needed).
+5.pydub: A Python library for audio processing (used for handling audio files in various formats).
+6.flask_cors: A Flask extension for handling Cross-Origin Resource Sharing (CORS), which is useful if your frontend and backend are hosted on different domains.
