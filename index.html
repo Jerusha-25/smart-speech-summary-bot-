@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Chatbot and Audio Summarization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .secondary {
+            background-color: #6c757d;
+        }
+
+        .secondary:hover {
+            background-color: #5a6268;
+        }
+
+        form {
+            margin: 20px 0;
+        }
+
+        form input[type="text"], form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        form input[type="file"] {
+            padding: 5px;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .results ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .results li {
+            margin-bottom: 10px;
+        }
+
+        .results li strong {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QA Chatbot and Audio Summarization</h1>
+
+        <!-- Section for Audio Recording and Upload -->
+        <section>
+            <h2>Transform audio into insights with transcription, summarization, and AI-powered Q&A.</h2>
+            <p>Record your audio and let us transcribe, summarize, and provide answers.</p>
+            
+            <div class="controls">
+                <button id="recordButton" class="btn primary">Start Recording</button>
+                <button id="stopButton" class="btn secondary" disabled>Stop Recording</button>
+            </div>
+            
+            <form id="uploadForm" action="/upload_audio" method="post" enctype="multipart/form-data" style="display:none;">
+                <input type="file" id="audioFile" name="audio_file">
+                <button type="submit" class="btn">Upload and Process</button>
+            </form>
+        </section>
+
+        <!-- Display Transcription and Summary -->
+        <section class="results">
+            <h2>Transcription, Summary, and Q&A</h2>
+
+            {% if transcription %}
+                <h3>Transcription:</h3>
+                <p>{{ transcription }}</p>
+            {% endif %}
+
+            {% if summary %}
+                <h3>Summary:</h3>
+                <p>{{ summary }}</p>
+            {% endif %}
+
+            {% if question_answers %}
+                <h3>Questions and Answers:</h3>
+                <ul>
+                    {% for qa in question_answers %}
+                        <li>
+                            <strong>Q:</strong> {{ qa['question'] }}<br>
+                            <strong>A:</strong> {{ qa['answer'] }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if transcription %}
+                <form action="/ask_question" method="post">
+                    <input type="hidden" name="context" value="{{ transcription }}">
+                    <label for="question">Ask a question:</label>
+                    <input type="text" id="question" name="question" required>
+                    <button type="submit">Ask</button>
+                </form>
+            {% endif %}
+        </section>
+         <!-- Section for Displaying Previous Questions and Answers -->
+        <section>
+            <h2>Question and Answer History</h2>
+            {% if qa_history %}
+                <ul>
+                    {% for qa in qa_history %}
+                        <li>
+                            <strong>Q:</strong> {{ qa.question }}<br>
+                            <strong>A:</strong> {{ qa.answer }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No questions asked yet.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById('recordButton').addEventListener('click', async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioFile = new File([blob], 'recording.wav', { type: 'audio/wav' });
+
+                const fileInput = document.getElementById('audioFile');
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(audioFile);
+                fileInput.files = dataTransfer.files;
+
+                document.getElementById('uploadForm').style.display = 'block';
+            };
+
+            audioChunks = [];
+            document.getElementById('recordButton').disabled = true;
+            document.getElementById('stopButton').disabled = false;
+        });
+
+        document.getElementById('stopButton').addEventListener('click', () => {
+            mediaRecorder.stop();
+            document.getElementById('recordButton').disabled = false;
+            document.getElementById('stopButton').disabled = true;
+        });
+    </script>
+</body>
+</html>
