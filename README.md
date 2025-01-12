@@ -1,5 +1,6 @@
 "AI-Powered QA Chatbot and Audio Summarization Web Application"
 "A web-based application that leverages AI for real-time transcription, summarization, and question-answering. Users can upload audio files for summarization and ask context-based questions, with AI-generated responses based on the provided content."
+
 Key Features:
 **Audio Recording and Uploading:** Record audio or upload pre-recorded audio files.
 **Audio Transcription:** Converts audio into text using advanced transcription models.
